@@ -5,22 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Tracker</title>
     <style>
-        /* General styles for mobile responsiveness */
+        /* Same styles as before */
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 10px;
+            margin: 20px;
+            padding: 0;
             background-color: #f4f4f9;
         }
 
         h1 {
             text-align: center;
             color: #333;
-            font-size: 1.8rem;
         }
 
         #expense-form {
-            max-width: 90%;
+            max-width: 400px;
             margin: 20px auto;
             padding: 15px;
             background: #fff;
@@ -40,18 +39,16 @@
 
         .form-group input {
             width: 95%;
-            padding: 10px;
+            padding: 8px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            font-size: 1rem;
         }
 
         #add-expense {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             background: #28a745;
             color: white;
-            font-size: 1rem;
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -62,12 +59,11 @@
         }
 
         #expense-list {
-            max-width: 95%;
+            max-width: 600px;
             margin: 20px auto;
             background: #fff;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            overflow-x: auto;
         }
 
         table {
@@ -95,8 +91,7 @@
             background: #dc3545;
             color: white;
             border: none;
-            padding: 8px 12px;
-            font-size: 0.9rem;
+            padding: 5px 10px;
             border-radius: 5px;
             cursor: pointer;
         }
@@ -146,8 +141,34 @@
         const totalExpenseDisplay = document.getElementById('total-expense');
 
         let totalExpense = 0;
+        let expenses = JSON.parse(localStorage.getItem('expenses')) || []; // Retrieve stored expenses
 
-        addExpenseButton.addEventListener('click', () => {
+        // Function to render expenses from localStorage
+        const renderExpenses = () => {
+            expenseTableBody.innerHTML = ''; // Clear the table body
+            totalExpense = 0; // Reset total expense
+
+            expenses.forEach((expense, index) => {
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>${expense.name}</td>
+                    <td>جنية${expense.amount.toFixed(2)}</td>
+                    <td><button class="remove-button" data-index="${index}">Remove</button></td>
+                `;
+                expenseTableBody.appendChild(newRow);
+                totalExpense += expense.amount;
+
+                // Add event listener for remove button
+                newRow.querySelector('.remove-button').addEventListener('click', () => {
+                    removeExpense(index);
+                });
+            });
+
+            totalExpenseDisplay.textContent = `Total: جنية${totalExpense.toFixed(2)}`;
+        };
+
+        // Function to add an expense
+        const addExpense = () => {
             const expenseName = expenseNameInput.value.trim();
             const expenseAmount = parseFloat(expenseAmountInput.value);
 
@@ -156,31 +177,31 @@
                 return;
             }
 
-            // Add expense to the table
-            const newRow = document.createElement('tr');
-            newRow.innerHTML = `
-                <td>${expenseName}</td>
-                <td>جنية${expenseAmount.toFixed(2)}</td>
-                <td><button class="remove-button">Remove</button></td>
-            `;
-            expenseTableBody.appendChild(newRow);
+            // Add to expenses array
+            const expense = { name: expenseName, amount: expenseAmount };
+            expenses.push(expense);
 
-            // Update total expense
-            totalExpense += expenseAmount;
-            totalExpenseDisplay.textContent = `Total: جنية${totalExpense.toFixed(2)}`;
+            // Save to localStorage
+            localStorage.setItem('expenses', JSON.stringify(expenses));
 
-            // Clear inputs
+            // Render updated list and clear inputs
+            renderExpenses();
             expenseNameInput.value = '';
             expenseAmountInput.value = '';
+        };
 
-            // Add event listener for the remove button
-            const removeButton = newRow.querySelector('.remove-button');
-            removeButton.addEventListener('click', () => {
-                expenseTableBody.removeChild(newRow);
-                totalExpense -= expenseAmount;
-                totalExpenseDisplay.textContent = `Total: جنية${totalExpense.toFixed(2)}`;
-            });
-        });
+        // Function to remove an expense
+        const removeExpense = (index) => {
+            expenses.splice(index, 1); // Remove from array
+            localStorage.setItem('expenses', JSON.stringify(expenses)); // Update localStorage
+            renderExpenses(); // Re-render expenses
+        };
+
+        // Add event listener to the "Add Expense" button
+        addExpenseButton.addEventListener('click', addExpense);
+
+        // Initial rendering of expenses
+        renderExpenses();
     </script>
 </body>
 </html>
