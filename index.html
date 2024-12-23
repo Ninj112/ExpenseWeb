@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Tracker</title>
     <style>
-        /* Same styles as before */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -141,34 +140,13 @@
         const totalExpenseDisplay = document.getElementById('total-expense');
 
         let totalExpense = 0;
-        let expenses = JSON.parse(localStorage.getItem('expenses')) || []; // Retrieve stored expenses
 
-        // Function to render expenses from localStorage
-        const renderExpenses = () => {
-            expenseTableBody.innerHTML = ''; // Clear the table body
-            totalExpense = 0; // Reset total expense
+        // Render existing expenses on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderExpenses();
+        });
 
-            expenses.forEach((expense, index) => {
-                const newRow = document.createElement('tr');
-                newRow.innerHTML = `
-                    <td>${expense.name}</td>
-                    <td>جنية${expense.amount.toFixed(2)}</td>
-                    <td><button class="remove-button" data-index="${index}">Remove</button></td>
-                `;
-                expenseTableBody.appendChild(newRow);
-                totalExpense += expense.amount;
-
-                // Add event listener for remove button
-                newRow.querySelector('.remove-button').addEventListener('click', () => {
-                    removeExpense(index);
-                });
-            });
-
-            totalExpenseDisplay.textContent = `Total: جنية${totalExpense.toFixed(2)}`;
-        };
-
-        // Function to add an expense
-        const addExpense = () => {
+        addExpenseButton.addEventListener('click', () => {
             const expenseName = expenseNameInput.value.trim();
             const expenseAmount = parseFloat(expenseAmountInput.value);
 
@@ -177,31 +155,81 @@
                 return;
             }
 
-            // Add to expenses array
-            const expense = { name: expenseName, amount: expenseAmount };
+            // Create a new expense object
+            const expense = {
+                name: expenseName,
+                amount: expenseAmount
+            };
+
+            // Retrieve existing expenses from localStorage
+            const expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+
+            // Add the new expense to the list
             expenses.push(expense);
 
-            // Save to localStorage
+            // Save the updated list back to localStorage
             localStorage.setItem('expenses', JSON.stringify(expenses));
 
-            // Render updated list and clear inputs
+            // Render the updated list
             renderExpenses();
+
+            // Clear inputs
             expenseNameInput.value = '';
             expenseAmountInput.value = '';
-        };
+        });
 
-        // Function to remove an expense
-        const removeExpense = (index) => {
-            expenses.splice(index, 1); // Remove from array
-            localStorage.setItem('expenses', JSON.stringify(expenses)); // Update localStorage
-            renderExpenses(); // Re-render expenses
-        };
+        function renderExpenses() {
+            // Retrieve expenses from localStorage
+            const expenses = JSON.parse(localStorage.getItem('expenses')) || [];
 
-        // Add event listener to the "Add Expense" button
-        addExpenseButton.addEventListener('click', addExpense);
+            // Clear the existing table body
+            expenseTableBody.innerHTML = '';
 
-        // Initial rendering of expenses
-        renderExpenses();
+            // Reset total expense
+            totalExpense = 0;
+
+            // Iterate over the expenses and add them to the table
+            expenses.forEach((expense, index) => {
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>${expense.name}</td>
+                    <td>جنية${expense.amount.toFixed(2)}</td>
+                    <td><button class="remove-button" data-index="${index}">Remove</button></td>
+                `;
+                expenseTableBody.appendChild(newRow);
+
+                // Update total expense
+                totalExpense += expense.amount;
+            });
+
+            // Update the total expense display
+            totalExpenseDisplay.textContent = `Total: جنية${totalExpense.toFixed(2)}`;
+
+            // Add event listeners for remove buttons
+            document.querySelectorAll('.remove-button').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const index = event.target.getAttribute('data-index');
+                    removeExpense(index);
+                });
+            });
+        }
+
+        function removeExpense(index) {
+            // Retrieve expenses from localStorage
+            const expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+
+            // Remove the expense at the specified index
+            const [removedExpense] = expenses.splice(index, 1);
+
+            // Save the updated list back to localStorage
+            localStorage.setItem('expenses', JSON.stringify(expenses));
+
+            // Update total expense
+            totalExpense -= removedExpense.amount;
+
+            // Render the updated list
+            renderExpenses();
+        }
     </script>
 </body>
 </html>
