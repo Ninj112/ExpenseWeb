@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        #expense-form {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 15px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 95%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #add-expense {
+            width: 100%;
+            padding: 10px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #add-expense:hover {
+            background: #218838;
+        }
+
+        #expense-list {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th, table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table th {
+            background: #f8f9fa;
+        }
+
+        #total-expense {
+            font-size: 1.2em;
+            text-align: right;
+            padding: 10px;
+        }
+
+        .remove-button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .remove-button:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Expense Tracker</h1>
+
+    <div id="expense-form">
+        <div class="form-group">
+            <label for="expense-name">Expense Name</label>
+            <input type="text" id="expense-name" placeholder="Enter expense name">
+        </div>
+
+        <div class="form-group">
+            <label for="expense-amount">Amount</label>
+            <input type="number" id="expense-amount" placeholder="Enter amount" step="0.01">
+        </div>
+
+        <button id="add-expense">Add Expense</button>
+    </div>
+
+    <div id="expense-list">
+        <table>
+            <thead>
+                <tr>
+                    <th>Expense Name</th>
+                    <th>Amount</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="expense-table-body">
+            </tbody>
+        </table>
+        <div id="total-expense">Total: جنية0.00</div>
+    </div>
+
+    <script>
+        const expenseNameInput = document.getElementById('expense-name');
+        const expenseAmountInput = document.getElementById('expense-amount');
+        const addExpenseButton = document.getElementById('add-expense');
+        const expenseTableBody = document.getElementById('expense-table-body');
+        const totalExpenseDisplay = document.getElementById('total-expense');
+
+        let totalExpense = 0;
+
+        addExpenseButton.addEventListener('click', () => {
+            const expenseName = expenseNameInput.value.trim();
+            const expenseAmount = parseFloat(expenseAmountInput.value);
+
+            if (expenseName === '' || isNaN(expenseAmount) || expenseAmount <= 0) {
+                alert('Please enter a valid expense name and amount.');
+                return;
+            }
+
+            // Add expense to the table
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${expenseName}</td>
+                <td>$${expenseAmount.toFixed(2)}</td>
+                <td><button class="remove-button">Remove</button></td>
+            `;
+            expenseTableBody.appendChild(newRow);
+
+            // Update total expense
+            totalExpense += expenseAmount;
+            totalExpenseDisplay.textContent = `Total: جنية${totalExpense.toFixed(2)}`;
+
+            // Clear inputs
+            expenseNameInput.value = '';
+            expenseAmountInput.value = '';
+
+            // Add event listener for the remove button
+            const removeButton = newRow.querySelector('.remove-button');
+            removeButton.addEventListener('click', () => {
+                expenseTableBody.removeChild(newRow);
+                totalExpense -= expenseAmount;
+                totalExpenseDisplay.textContent = `Total: جنية${totalExpense.toFixed(2)}`;
+            });
+        });
+    </script>
+</body>
+</html>
